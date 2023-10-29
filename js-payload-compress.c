@@ -3,7 +3,7 @@ javascript-payload-compression: Compress input javascript with zopfli deflate.
 Write html outfile with small unpack script in onload of svg element that uses
 DecompressionStream to uncompress and eval the input javascript.
 
-clang -lz -lzopfli -std=c17 -Wall -Wextra -pedantic js-payload-compress.c
+clang -lz -lzopfli -std=c17 -Wall -Wextra -pedantic -o js-payload-compress js-payload-compress.c
 
 Based on work by 0b5vr and subzey:
 https://gist.github.com/0b5vr/09ee96ca2efbe5bf9d64dad7220e923b
@@ -57,7 +57,8 @@ char *NO_COMPRESSION_SCRIPT =
     "<svg onload=\"fetch`#`.then(r=>r.blob()).then(b=>new "
     "Response(b.slice(%u).stream()).text()).then(eval)\">";
 
-char *read_text_file(const char *infile_path) {
+char *read_text_file(const char *infile_path)
+{
   char *text = NULL;
   FILE *file = fopen(infile_path, "rt");
 
@@ -85,7 +86,8 @@ char *read_text_file(const char *infile_path) {
 
 void compress(unsigned char *source_data, size_t source_data_size,
               unsigned char **compressed_data, size_t *compressed_data_size,
-              user_options *user_options) {
+              user_options *user_options)
+{
   ZopfliOptions zopfli_options;
   ZopfliInitOptions(&zopfli_options);
   zopfli_options.numiterations = user_options->zopfli_iterations;
@@ -96,7 +98,8 @@ void compress(unsigned char *source_data, size_t source_data_size,
 
 bool write_html(char *outfile_path, char *unpack_script,
                unsigned char *compressed_data, size_t compressed_data_size,
-               size_t *outfile_size) {
+               size_t *outfile_size)
+{
   FILE *outfile = fopen(outfile_path, "wb+");
   if (outfile == NULL) {
     printf("Failed to create destination file '%s'\n", outfile_path);
@@ -132,7 +135,8 @@ bool write_html(char *outfile_path, char *unpack_script,
 }
 
 bool write_raw(char *outfile_path, unsigned char *compressed_data,
-              size_t compressed_data_size) {
+              size_t compressed_data_size)
+{
   FILE *outfile = fopen(outfile_path, "wb+");
   if (outfile == NULL) {
     printf("Failed to create destination file '%s'\n", outfile_path);
@@ -152,7 +156,8 @@ bool write_raw(char *outfile_path, unsigned char *compressed_data,
 
 void print_compression_statistics(size_t source_data_size,
                                   size_t compressed_data_size,
-                                  bool no_compression) {
+                                  bool no_compression)
+{
   printf("Input Javascript size: %lu bytes\n", source_data_size);
   printf("Output HTML file size: %li bytes\n", compressed_data_size);
   printf("HTML is %3.2f percent of javascript\n",
@@ -162,7 +167,8 @@ void print_compression_statistics(size_t source_data_size,
   }
 }
 
-void print_usage_information() {
+void print_usage_information()
+{
   printf("Usage: js-payload-compress [options] infile.js outfile.html\n");
   printf("\n");
   printf("Options:\n");
@@ -177,7 +183,8 @@ void print_usage_information() {
   printf("%s: Do not show statistics.\n", NO_STATISTICS);
 }
 
-void process_command_line(user_options *user_options, int argc, char *argv[]) {
+void process_command_line(user_options *user_options, int argc, char *argv[])
+{
   if (argc < 3) {
     print_usage_information();
     return;
@@ -220,9 +227,8 @@ void process_command_line(user_options *user_options, int argc, char *argv[]) {
   }
 }
 
-int main(int argc, char *argv[]) {
-  printf("js-payload-compress\n");
-
+int main(int argc, char *argv[])
+{
   user_options user_options = {NULL, NULL, 50, false, false, false, false};
   process_command_line(&user_options, argc, argv);
   if (user_options.javascript_path == NULL || user_options.html_path == NULL) {
