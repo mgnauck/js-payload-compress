@@ -16,11 +16,6 @@ https://github.com/google/zopfli
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef _WIN32
-#include <winsock.h>
-#else
-#include <arpa/inet.h>
-#endif
 #include "zopfli.h"
 
 typedef struct USER_OPTIONS_s {
