@@ -12,7 +12,7 @@ Use this to compress your 4k/8k/64k javascript intro. Compresses an input javasc
 ## Uses:
 - [Google zopfli](https://github.com/google/zopfli)
 
-## Usage
+## Usage:
 ```
 js-payload-compress [options] infile.js outfile.html
 
