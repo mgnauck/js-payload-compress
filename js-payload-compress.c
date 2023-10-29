@@ -17,6 +17,7 @@ https://github.com/google/zopfli
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "zopfli.h"
 
 typedef struct USER_OPTIONS_s {
@@ -25,14 +26,16 @@ typedef struct USER_OPTIONS_s {
   int zopfli_iterations;
   bool no_blocksplitting;
   bool no_compression;
+  bool dump_compressed_raw;
   bool no_statistics;
 } USER_OPTIONS;
 
 // Command line option names
-const char *ZOPFLI_ITERATIONS = "--zopfli_iterations=";
-const char *NO_BLOCK_SPLITTING = "--no_blocksplitting";
-const char *NO_COMPRESSION = "--no_compression";
-const char *NO_STATISTICS = "--no_statistics";
+const char *ZOPFLI_ITERATIONS = "--zopfli-iterations=";
+const char *NO_BLOCK_SPLITTING = "--no-blocksplitting";
+const char *NO_COMPRESSION = "--no-compression";
+const char *DUMP_COMPRESSED_RAW = "--dump-compressed-raw";
+const char *NO_STATISTICS = "--no-statistics";
 
 // Length of unpack script is currently 156 chars. This marker is used to
 // separate (slice) the unpack from the compressed data. (Actual length of the
@@ -129,6 +132,25 @@ int write_html(char *outfile_path, char *unpack_script,
   return EXIT_SUCCESS;
 }
 
+int write_raw(char *outfile_path, unsigned char *compressed_data,
+              size_t compressed_data_size) {
+  FILE *outfile = fopen(outfile_path, "wb+");
+  if (outfile == NULL) {
+    printf("Failed to create destination file '%s'\n", outfile_path);
+    return EXIT_FAILURE;
+  }
+
+  if (fwrite(compressed_data, sizeof(unsigned char), compressed_data_size,
+             outfile) != compressed_data_size * sizeof(unsigned char)) {
+    fclose(outfile);
+    return EXIT_FAILURE;
+  }
+
+  fclose(outfile);
+
+  return EXIT_SUCCESS;
+}
+
 void print_compression_statistics(size_t source_data_size,
                                   size_t compressed_data_size,
                                   bool no_compression) {
@@ -150,6 +172,9 @@ void print_usage_information() {
   printf("compression. Default is 50.\n");
   printf("%s: Do not use block splitting.\n", NO_BLOCK_SPLITTING);
   printf("%s: No compression (for testing).\n", NO_COMPRESSION);
+  printf("%s: Dump compressed data to file raw (w/o unpack script).\n",
+         DUMP_COMPRESSED_RAW);
+  printf("  Attaches '.bin' to infile path for raw output.\n");
   printf("%s: Do not show statistics.\n", NO_STATISTICS);
 }
 
@@ -178,6 +203,11 @@ void process_command_line(USER_OPTIONS *user_options, int argc, char *argv[]) {
       continue;
     }
 
+    if (strncmp(argv[i], DUMP_COMPRESSED_RAW, strlen(DUMP_COMPRESSED_RAW)) ==
+        0) {
+      user_options->dump_compressed_raw = true;
+      continue;
+    }
     if (strncmp(argv[i], NO_STATISTICS, strlen(NO_STATISTICS)) == 0) {
       user_options->no_statistics = true;
       continue;
@@ -194,9 +224,10 @@ void process_command_line(USER_OPTIONS *user_options, int argc, char *argv[]) {
 int main(int argc, char *argv[]) {
   printf("js-payload-compress\n");
 
-  USER_OPTIONS user_options = {NULL, NULL, 50, false, false, false};
+  USER_OPTIONS user_options = {NULL, NULL, 50, false, false, false, false};
   process_command_line(&user_options, argc, argv);
   if (user_options.javascript_path == NULL || user_options.html_path == NULL) {
+    printf("Failed to interpret commandline (specified in or out file).\n");
     return EXIT_FAILURE;
   }
 
@@ -231,6 +262,14 @@ int main(int argc, char *argv[]) {
   if (status != EXIT_FAILURE && !user_options.no_statistics) {
     print_compression_statistics(javascript_size, outfile_size,
                                  user_options.no_compression);
+  }
+
+  if (!user_options.no_compression && user_options.dump_compressed_raw) {
+    char raw_path[strlen(user_options.javascript_path) + 5];
+    snprintf(raw_path, sizeof(raw_path), "%s.bin",
+             user_options.javascript_path);
+    status =
+        write_raw(raw_path, compressed_javascript, compressed_javascript_size);
   }
 
   free(compressed_javascript);
