@@ -1,6 +1,6 @@
 # js-payload-compress
 
-Use this to compress your 4k/8k/64k javscript intro. Compresses an input javascript with [zopfli](https://github.com/google/zopfli) deflate. Writes a html output file with a small unpack script in the onload attribute of a svg element that uses a [DecompressionStream](https://developer.mozilla.org/en-US/docs/Web/API/DecompressionStream) to decompress and eval the input javascript.
+Use this to compress your 4k/8k/64k javascript intro. Compresses an input javascript with [zopfli](https://github.com/google/zopfli) deflate. Writes a html output file containing a minimal unpack script in the onload attribute of a svg element that uses a [DecompressionStream](https://developer.mozilla.org/en-US/docs/Web/API/DecompressionStream) to decompress and eval the input javascript.
 
 ## Build with:
 `gcc -lz -lzopfli -std=c17 -Wall -Wextra -pedantic -o js-payload-compress js-payload-compress.c`
