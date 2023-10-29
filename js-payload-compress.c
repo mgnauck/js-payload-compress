@@ -20,7 +20,7 @@ https://github.com/google/zopfli
 
 #include "zopfli.h"
 
-typedef struct USER_OPTIONS_s {
+typedef struct USER_OPTIONS {
   char *javascript_path;
   char *html_path;
   int zopfli_iterations;
