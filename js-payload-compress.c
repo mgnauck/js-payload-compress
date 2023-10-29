@@ -20,7 +20,7 @@ https://github.com/google/zopfli
 
 #include "zopfli.h"
 
-typedef struct USER_OPTIONS {
+typedef struct user_options {
   char *javascript_path;
   char *html_path;
   int zopfli_iterations;
@@ -28,7 +28,7 @@ typedef struct USER_OPTIONS {
   bool no_compression;
   bool dump_compressed_raw;
   bool no_statistics;
-} USER_OPTIONS;
+} user_options;
 
 // Command line option names
 const char *ZOPFLI_ITERATIONS = "--zopfli-iterations=";
@@ -85,7 +85,7 @@ char *read_text_file(const char *infile_path) {
 
 void compress(unsigned char *source_data, size_t source_data_size,
               unsigned char **compressed_data, size_t *compressed_data_size,
-              USER_OPTIONS *user_options) {
+              user_options *user_options) {
   ZopfliOptions zopfli_options;
   ZopfliInitOptions(&zopfli_options);
   zopfli_options.numiterations = user_options->zopfli_iterations;
@@ -177,7 +177,7 @@ void print_usage_information() {
   printf("%s: Do not show statistics.\n", NO_STATISTICS);
 }
 
-void process_command_line(USER_OPTIONS *user_options, int argc, char *argv[]) {
+void process_command_line(user_options *user_options, int argc, char *argv[]) {
   if (argc < 3) {
     print_usage_information();
     return;
@@ -223,7 +223,7 @@ void process_command_line(USER_OPTIONS *user_options, int argc, char *argv[]) {
 int main(int argc, char *argv[]) {
   printf("js-payload-compress\n");
 
-  USER_OPTIONS user_options = {NULL, NULL, 50, false, false, false, false};
+  user_options user_options = {NULL, NULL, 50, false, false, false, false};
   process_command_line(&user_options, argc, argv);
   if (user_options.javascript_path == NULL || user_options.html_path == NULL) {
     printf("Failed to interpret commandline (specified in or out file).\n");
