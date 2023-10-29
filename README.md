@@ -4,7 +4,7 @@ Compress input javascript with [zopfli](https://github.com/google/zopfli) deflat
 
 clang -lz -lzopfli -std=c17 -Wall -Wextra -pedantic js-payload-compress.c
 
-Based on work by 0b5vr and subzey:
+Based on (thanks!):
 - [0b5vr](https://gist.github.com/0b5vr/09ee96ca2efbe5bf9d64dad7220e923b)
 - [subzey](https://github.com/subzey/fetchcrunch)
 
