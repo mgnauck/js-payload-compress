@@ -3,7 +3,7 @@ javascript-payload-compression: Compress input javascript with zopfli deflate.
 Write html outfile with small unpack script in onload of svg element that uses
 DecompressionStream to uncompress and eval the input javascript.
 
-clang -lz -lzopfli -std=c17 -Wall -Wextra -pedantic -o js-payload-compress js-payload-compress.c
+gcc -lz -lzopfli -std=c17 -Wall -Wextra -pedantic -o js-payload-compress js-payload-compress.c
 
 Based on work by 0b5vr and subzey:
 https://gist.github.com/0b5vr/09ee96ca2efbe5bf9d64dad7220e923b
