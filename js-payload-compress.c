@@ -67,9 +67,9 @@ char *read_text_file(const char *infile_path) {
     rewind(file);
 
     // Add an additional byte for null terminating the string
-    text = (char *)calloc(size + 1, sizeof(char));
+    text = (char *)calloc(size + 1, 1);
 
-    if (fread(text, sizeof(char), size, file) != size) {
+    if (fread(text, 1, size, file) != size) {
       printf("Failed to read source file '%s'\n", infile_path);
       free(text);
       text = NULL;
@@ -94,61 +94,60 @@ void compress(unsigned char *source_data, size_t source_data_size,
                  source_data_size, compressed_data, compressed_data_size);
 }
 
-int write_html(char *outfile_path, char *unpack_script,
+bool write_html(char *outfile_path, char *unpack_script,
                unsigned char *compressed_data, size_t compressed_data_size,
                size_t *outfile_size) {
   FILE *outfile = fopen(outfile_path, "wb+");
   if (outfile == NULL) {
     printf("Failed to create destination file '%s'\n", outfile_path);
-    return EXIT_FAILURE;
+    return false;
   }
 
   // Substitute actual script length in unpack script
-  size_t max_script_length = strlen(unpack_script) + 2 * sizeof(char);
+  size_t max_script_length = strlen(unpack_script) + 2;
   char final_script[max_script_length];
   snprintf(final_script, max_script_length, unpack_script,
            // %u formatter is already included with 2 chars (but will be
            // substituted with actual length) and we need one more char since
            // the actual script length will require 3 chars
-           strlen(unpack_script) + sizeof(char));
-  if (fwrite(final_script, sizeof(char), strlen(final_script), outfile) !=
-      strlen(final_script) * sizeof(char)) {
+           strlen(unpack_script) + 1);
+  if (fwrite(final_script, 1, strlen(final_script), outfile) !=
+      strlen(final_script)) {
     fclose(outfile);
-    return EXIT_FAILURE;
+    return false;
   }
 
-  if (fwrite(compressed_data, sizeof(unsigned char), compressed_data_size,
-             outfile) != compressed_data_size * sizeof(unsigned char)) {
+  if (fwrite(compressed_data, 1, compressed_data_size, outfile) !=
+      compressed_data_size) {
     fclose(outfile);
-    return EXIT_FAILURE;
+    return false;
   }
 
   fclose(outfile);
 
   // Calculate size of output file
-  *outfile_size = strlen(final_script) * sizeof(char) +
-                  compressed_data_size * sizeof(unsigned char);
+  *outfile_size = strlen(final_script) + compressed_data_size;
 
-  return EXIT_SUCCESS;
+  return true;
 }
 
-int write_raw(char *outfile_path, unsigned char *compressed_data,
+bool write_raw(char *outfile_path, unsigned char *compressed_data,
               size_t compressed_data_size) {
   FILE *outfile = fopen(outfile_path, "wb+");
   if (outfile == NULL) {
     printf("Failed to create destination file '%s'\n", outfile_path);
-    return EXIT_FAILURE;
+    return false;
   }
 
-  if (fwrite(compressed_data, sizeof(unsigned char), compressed_data_size,
-             outfile) != compressed_data_size * sizeof(unsigned char)) {
+  if (fwrite(compressed_data, 1, compressed_data_size, outfile) !=
+      compressed_data_size) {
     fclose(outfile);
-    return EXIT_FAILURE;
+    return false;
   }
 
   fclose(outfile);
 
-  return EXIT_SUCCESS;
+  return true;
 }
 
 void print_compression_statistics(size_t source_data_size,
@@ -228,12 +227,12 @@ int main(int argc, char *argv[]) {
   process_command_line(&user_options, argc, argv);
   if (user_options.javascript_path == NULL || user_options.html_path == NULL) {
     printf("Failed to interpret commandline (specified in or out file).\n");
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE);
   }
 
   char *javascript = read_text_file(user_options.javascript_path);
   if (javascript == NULL) {
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE);
   }
 
   size_t javascript_size = strlen(javascript);
@@ -246,7 +245,7 @@ int main(int argc, char *argv[]) {
              &user_options);
     free(javascript);
     if (compressed_javascript == NULL) {
-      return EXIT_FAILURE;
+      exit(EXIT_FAILURE);
     }
   } else {
     compressed_javascript = (unsigned char *)javascript;
@@ -254,12 +253,12 @@ int main(int argc, char *argv[]) {
   }
 
   size_t outfile_size = 0;
-  int status = write_html(user_options.html_path,
+  bool error = write_html(user_options.html_path,
                           user_options.no_compression ? NO_COMPRESSION_SCRIPT
                                                       : DECOMPRESSION_SCRIPT,
                           compressed_javascript, compressed_javascript_size,
                           &outfile_size);
-  if (status != EXIT_FAILURE && !user_options.no_statistics) {
+  if (!error && !user_options.no_statistics) {
     print_compression_statistics(javascript_size, outfile_size,
                                  user_options.no_compression);
   }
@@ -268,11 +267,11 @@ int main(int argc, char *argv[]) {
     char raw_path[strlen(user_options.javascript_path) + 5];
     snprintf(raw_path, sizeof(raw_path), "%s.bin",
              user_options.javascript_path);
-    status =
+    error =
         write_raw(raw_path, compressed_javascript, compressed_javascript_size);
   }
 
   free(compressed_javascript);
 
-  return status;
+  return error ? EXIT_FAILURE : EXIT_SUCCESS;
 }
