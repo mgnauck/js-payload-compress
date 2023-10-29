@@ -103,7 +103,7 @@ bool write_html(char *outfile_path, char *unpack_script,
   FILE *outfile = fopen(outfile_path, "wb+");
   if (outfile == NULL) {
     printf("Failed to create destination file '%s'\n", outfile_path);
-    return false;
+    return true;
   }
 
   // Substitute actual script length in unpack script
@@ -116,14 +116,16 @@ bool write_html(char *outfile_path, char *unpack_script,
            strlen(unpack_script) + 1);
   if (fwrite(final_script, 1, strlen(final_script), outfile) !=
       strlen(final_script)) {
+    printf("Failed to write final script to destination file\n");
     fclose(outfile);
-    return false;
+    return true;
   }
 
   if (fwrite(compressed_data, 1, compressed_data_size, outfile) !=
       compressed_data_size) {
+    printf("Failed to write compressed data to destination file\n");
     fclose(outfile);
-    return false;
+    return true;
   }
 
   fclose(outfile);
@@ -131,7 +133,7 @@ bool write_html(char *outfile_path, char *unpack_script,
   // Calculate size of output file
   *outfile_size = strlen(final_script) + compressed_data_size;
 
-  return true;
+  return false;
 }
 
 bool write_raw(char *outfile_path, unsigned char *compressed_data,
@@ -140,18 +142,19 @@ bool write_raw(char *outfile_path, unsigned char *compressed_data,
   FILE *outfile = fopen(outfile_path, "wb+");
   if (outfile == NULL) {
     printf("Failed to create destination file '%s'\n", outfile_path);
-    return false;
+    return true;
   }
 
   if (fwrite(compressed_data, 1, compressed_data_size, outfile) !=
       compressed_data_size) {
+    printf("Failed to write compressed data to destination file\n");
     fclose(outfile);
-    return false;
+    return true;
   }
 
   fclose(outfile);
 
-  return true;
+  return false;
 }
 
 void print_compression_statistics(size_t source_data_size,
@@ -160,7 +163,7 @@ void print_compression_statistics(size_t source_data_size,
 {
   printf("Input Javascript size: %lu bytes\n", source_data_size);
   printf("Output HTML file size: %li bytes\n", compressed_data_size);
-  printf("HTML is %3.2f percent of javascript\n",
+  printf("Output is %3.2f percent of input\n",
          compressed_data_size / (float)source_data_size * 100.0f);
   if (no_compression) {
     printf("No compression flag was specified\n");
