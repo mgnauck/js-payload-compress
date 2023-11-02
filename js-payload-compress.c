@@ -1,9 +1,13 @@
 /*
-javascript-payload-compression: Compress input javascript with zopfli deflate.
-Write html outfile with small unpack script in onload of svg element that uses
-DecompressionStream to uncompress and eval the input javascript.
+Compression for 4k/8k/64k javascript intros. Compress input javascript
+with zopfli deflate. Write html outfile with small unpack script in onload
+of svg element that uses DecompressionStream to decompress and eval the
+input javascript.
 
-gcc -lz -lzopfli -std=c17 -Wall -Wextra -pedantic -o js-payload-compress js-payload-compress.c
+Author: Markus Gnauck
+
+Build:
+cc js-payload-compress.c -std=c2x -Wall -Wextra -pedantic -lzopfli -o js-payload-compress
 
 Based on work by 0b5vr and subzey:
 https://gist.github.com/0b5vr/09ee96ca2efbe5bf9d64dad7220e923b
@@ -18,7 +22,7 @@ https://github.com/google/zopfli
 #include <stdlib.h>
 #include <string.h>
 
-#include "zopfli.h"
+#include <zopfli/zopfli.h>
 
 typedef struct user_options {
   char *javascript_path;
