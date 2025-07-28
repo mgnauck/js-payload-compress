@@ -17,11 +17,12 @@ Use this to compress your 4k/8k/64k javascript intro. Compresses an input javasc
 js-payload-compress [options] infile.js outfile.html
 
 Options:
---zopfli-iterations=[number]: Number of zopfli iterations. More iterations take
-  more time but can provide slightly better compression. Default is 50.
+--zopfli-iterations=[number]: Number of zopfli iterations. More iterations take more time but can provide slightly better compression. Default is 50.
+--decompression-type=[type]: Decompression type as per DecompressionStream API (gzip or deflate-raw).
 --no-blocksplitting: Do not use block splitting.
---no-compression: No compression (for testing).
---dump-compressed-raw: Dump compressed data to file raw (w/o unpack script).
-  Attaches '.bin' to infile path for raw output.
+--no-compression: No compression (i.e. with decompression type 'gzip' or for testing).
+--no-decompression-script: Use the unpack script w/o decompression (for testing).
+--dump-compressed-raw: Dump compressed data to file raw (w/o unpack script). Attaches '.bin' to infile path for raw output.
+--write-no-html: Write no html (i.e. raw only).
 --no-statistics: Do not show statistics.
 ```
