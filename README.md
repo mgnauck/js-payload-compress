@@ -18,7 +18,7 @@ js-payload-compress [options] infile.js outfile.html
 
 Options:
 --zopfli-iterations=[number]: Number of zopfli iterations. More iterations take more time but can provide slightly better compression. Default is 50.
---decompression-type=[type]: Decompression type as per DecompressionStream API (gzip or deflate-raw).
+--decompression-type=[type]: Decompression type as per DecompressionStream API, i.e. gzip or deflate-raw (default).
 --no-blocksplitting: Do not use block splitting.
 --no-compression: No compression (i.e. with decompression type 'gzip' or for testing).
 --no-decompression-script: Use the unpack script w/o decompression (for testing).
